@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Signature Verification</title>
+</head>
+<body>
+    <h1>Upload Signature for Verification</h1>
+    <form action="/verify" method="post" enctype="multipart/form-data">
+        <input type="file" name="signature" accept="image/*" required>
+        <button type="submit">Verify Signature</button>
+    </form>
+</body>
+</html>
