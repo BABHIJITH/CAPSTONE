@@ -1,14 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signature Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        p {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload Signature for Verification</h1>
-    <form action="/verify" method="post" enctype="multipart/form-data">
-        <input type="file" name="signature" accept="image/*" required>
-        <button type="submit">Verify Signature</button>
-    </form>
+
+    <div class="container">
+        <h1>Signature Verification</h1>
+        <p>Upload a signature image to verify if it is genuine or forged.</p>
+        
+        <form action="/verify" method="post" enctype="multipart/form-data">
+            <input type="file" name="signature" accept="image/*" required>
+            <button type="submit">Verify Signature</button>
+        </form>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 Signature Verification. All rights reserved.</p>
+    </div>
+
 </body>
 </html>
