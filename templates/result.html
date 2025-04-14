@@ -4,87 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification Result</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 60%;
-            margin: 0 auto;
-            padding: 40px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #4CAF50;
-        }
-        .result {
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-        .confidence {
-            font-size: 18px;
-            color: #555;
-            margin-top: 10px;
-        }
-        .signature-image {
-            margin-top: 30px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .signature-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-        .btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #45a049;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 14px;
-            color: #777;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-
     <div class="container">
-        <h1>Signature Verification Result</h1>
-        
-        <p class="result">Result: <strong>{{ result }}</strong></p>
-        <p class="confidence">Confidence: <strong>{{ (confidence * 100) | round(2) }}%</strong></p>
-        
-        <div class="signature-image">
-            <img src="{{ url_for('static', filename='uploads/' ~ filename) }}" alt="Uploaded Signature">
+        <header>
+            <h1>Verification Result</h1>
+        </header>
+
+        <div class="result">
+            <p class="result-text">Signature is: <strong>{{ result }}</strong></p>
+            <img src="{{ url_for('static', filename='uploads/' + image_path.split('/')[-1]) }}" alt="Uploaded Signature" class="result-image">
         </div>
-        
-        <a class="btn" href="{{ url_for('index') }}">Verify Another Signature</a>
-    </div>
 
-    <div class="footer">
-        <p>&copy; 2025 Signature Verification. All rights reserved.</p>
+        <div class="back-btn">
+            <a href="/" class="btn">Go back to upload another signature</a>
+        </div>
     </div>
-
 </body>
 </html>

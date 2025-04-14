@@ -1,41 +1,47 @@
 import os
+import cv2
 import numpy as np
 import joblib
-from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.preprocessing import StandardScaler
 from feature_extractor import get_feature_extractor, extract_features
 
-def load_dataset(data_dir):
-    X, y = [], []
-    classes = {'genuine': 1, 'forged': 0}
-    extractor = get_feature_extractor()
-    
-    for label, class_val in classes.items():
-        folder = os.path.join(data_dir, label)
-        for file in os.listdir(folder):
-            file_path = os.path.join(folder, file)
-            try:
-                feat = extract_features(file_path, extractor)
-                X.append(feat)
-                y.append(class_val)
-            except Exception as e:
-                print(f'Error processing {file_path}: {e}')
-    return np.array(X), np.array(y)
+# Path to the data folders
+genuine_folder = 'data/genuine/'
+forged_folder = 'data/forged/'
 
-if __name__ == '__main__':
-    data_dir = 'data'
-    X, y = load_dataset(data_dir)
-    print(f"Loaded {len(X)} samples")
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    svm = SVC(kernel='linear', probability=True)
-    svm.fit(X_train, y_train)
-    
-    print("SVM training complete")
-    accuracy = svm.score(X_test, y_test)
-    print(f"Test Accuracy: {accuracy * 100:.2f}%")
-    
-    # Save the trained model
-    os.makedirs('models', exist_ok=True)
-    joblib.dump(svm, 'models/svm_model.pkl')
-    print("Trained model saved as models/svm_model.pkl")
+# Initialize the feature extraction model (VGG16 without the top layers)
+model = get_feature_extractor()
+
+# Function to load images and extract features
+def load_data(folder, label):
+    features = []
+    labels = []
+    for img_name in os.listdir(folder):
+        img_path = os.path.join(folder, img_name)
+        if img_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+            feature = extract_features(img_path, model)
+            features.append(feature)
+            labels.append(label)
+    return features, labels
+
+# Load data from both genuine and forged folders
+genuine_features, genuine_labels = load_data(genuine_folder, label=1)  # Genuine signatures as class 1
+forged_features, forged_labels = load_data(forged_folder, label=0)    # Forged signatures as class 0
+
+# Combine the genuine and forged data
+X = np.array(genuine_features + forged_features)
+y = np.array(genuine_labels + forged_labels)
+
+# Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Train an SVM classifier
+svm_classifier = svm.SVC(kernel='linear', probability=True)
+svm_classifier.fit(X_scaled, y)
+
+# Save the trained model and scaler
+joblib.dump(svm_classifier, 'models/svm_model.pkl')
+joblib.dump(scaler, 'models/scaler.pkl')
+print("SVM model and scaler saved!")

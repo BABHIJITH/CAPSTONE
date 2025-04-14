@@ -1,62 +1,54 @@
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import joblib
+from feature_extractor import get_feature_extractor, extract_features
 import numpy as np
-from flask import Flask, request, render_template
-from enhancenet.enhance_utils import enhance_signature  
-from cnn_model.extract_features import extract_features 
+import cv2
 
 app = Flask(__name__)
 
+# Load the pre-trained SVM model and scaler
+svm_model = joblib.load('models/svm_model.pkl')
+scaler = joblib.load('models/scaler.pkl')
 
-svm_model = joblib.load('models/svm_model.pkl')  
-feature_model = get_feature_extractor()  
+# Initialize the VGG16 model for feature extraction
+feature_extractor = get_feature_extractor()
 
-
-UPLOAD_FOLDER = 'static/uploads'
+# Path for saving uploaded files
+UPLOAD_FOLDER = 'static/uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Home route for uploading signatures
 @app.route('/')
 def index():
-    """
-    Renders the home page with the upload form for signature verification.
-    """
     return render_template('index.html')
 
+# Route for handling file upload and verification
 @app.route('/verify', methods=['POST'])
-def verify():
-    """
-    Handles the signature verification process: file upload, image enhancement, feature extraction, and prediction.
-    """
+def verify_signature():
     if 'signature' not in request.files:
-        return "No file part", 400
+        return redirect(request.url)
     
     file = request.files['signature']
     
     if file.filename == '':
-        return "No selected file", 400
-
+        return redirect(request.url)
     
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(file_path)
-    
-   
-    enhanced_image = enhance_signature(file_path)  
-    enhanced_image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'enhanced_' + file.filename)
-    enhanced_image.save(enhanced_image_path)  
-    
-    features = extract_features(enhanced_image_path, feature_model)
-    
-
-    prediction = svm_model.predict([features])[0]
-    probability = svm_model.predict_proba([features])[0]
-    
-   
-    result = "Genuine Signature" if prediction == 1 else "Forged Signature"
-    confidence = max(probability)  
-    
-   
-    return render_template('result.html', result=result, confidence=confidence, filename=enhanced_image_path)
+    if file:
+        # Save the uploaded file
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filename)
+        
+        # Extract features from the uploaded image
+        features = extract_features(filename, feature_extractor)
+        features_scaled = scaler.transform([features])  # Standardize the features
+        
+        # Make prediction with the SVM model
+        prediction = svm_model.predict(features_scaled)
+        
+        result = "Genuine" if prediction[0] == 1 else "Forged"
+        
+        return render_template('result.html', result=result, image_path=filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
