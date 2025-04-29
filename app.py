@@ -17,18 +17,17 @@ os.makedirs(REGISTERED_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['REGISTERED_FOLDER'] = REGISTERED_FOLDER
 
-# Load pre-trained SVM model and scaler
 svm_model = joblib.load('models/svm_model.pkl')
 scaler = joblib.load('models/scaler.pkl')
 feature_extractor = get_feature_extractor()
 
-# ---------------- Routes ---------------- #
+
 
 @app.route('/')
 def index():
     return render_template('login.html')
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     username = request.form.get('username')
     password = request.form.get('password')
@@ -39,11 +38,12 @@ def login():
         flash("Invalid Credentials!", "danger")
         return redirect(url_for('index'))
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user', None)
     flash("You have been logged out.", "info")
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
+
 
 @app.route('/dashboard')
 def dashboard():
